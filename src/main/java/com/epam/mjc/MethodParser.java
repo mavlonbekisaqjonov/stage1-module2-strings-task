@@ -1,4 +1,7 @@
 package com.epam.mjc;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class MethodParser {
 
@@ -20,6 +23,62 @@ public class MethodParser {
      * @return {@link MethodSignature} object filled with parsed values from source string
      */
     public MethodSignature parseFunction(String signatureString) {
-        throw new UnsupportedOperationException("You should implement this method.");
+
+        StringTokenizer str = new StringTokenizer(signatureString, " ");
+
+        String accessModifier = null;
+        String returnType = "";
+        String methodName = "";
+        String parameters = "";
+
+        // Extract Access Modifier (if present)
+        if (str.hasMoreTokens()) {
+            String firstToken = str.nextToken();
+            if (firstToken.equals("public") || firstToken.equals("private") || firstToken.equals("protected")) {
+                accessModifier = firstToken;
+            } else {
+                returnType = firstToken; // If no access modifier, it's the return type
+            }
+        }
+
+        // Extract Return Type
+        if (returnType.isEmpty() && str.hasMoreTokens()) {
+            returnType = str.nextToken();
+        }
+
+        String remaining = "";
+
+        if (str.hasMoreTokens()) {
+            remaining = str.nextToken("").trim(); // Get remaining string
+            remaining = remaining.replace("(", " ").replace(")", "").trim();
+        }
+
+        StringTokenizer str1 = new StringTokenizer(remaining);
+
+        // Extract Method Name
+        if (str1.hasMoreTokens()) {
+            methodName = str1.nextToken();  // Fixed: using str1 instead of str to get the method name
+        }
+
+        if (str1.hasMoreTokens()) {
+            parameters = str1.nextToken("").trim(); // Get remaining string
+            parameters = parameters.replace("(", " ").replace(")", " ").trim();
+        }
+
+        List<MethodSignature.Argument> arguments = new ArrayList<>();
+        String[] argPairs = parameters.split(", ");
+        for (String arg : argPairs) {
+            String[] parts = arg.trim().split(" "); // Split type and name
+            if(parts.length==2){
+                arguments.add(new MethodSignature.Argument(parts[0], parts[1])); // Create Argument object
+            }
+        }
+
+        MethodSignature object = new MethodSignature(methodName, arguments);
+        object.setAccessModifier(accessModifier);
+        object.setReturnType(returnType);
+
+
+        return object;
     }
 }
